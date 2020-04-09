@@ -45,7 +45,7 @@ function getColor(d) {
 
       var div = L.DomUtil.create('div', 'legend');
       labels = ['<strong>Categories</strong>'],
-      categories = ['0-1','1-2','2-3','3-4','5+'];
+      categories = ['0-1','1-2','2-3','3-4','4+'];
   
     //cycle through the full length of the data, push for each one to show the color
       for (var i = 0; i < categories.length; i++) {
