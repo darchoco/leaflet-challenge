@@ -1,10 +1,12 @@
 var jsonUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
+
+//define function to set color based on what level of magnitude the earthquake had
 function getColor(d) {
-  return d <= 1 ? 'green' : // Means: if (d >= 1966) return 'green' else…
-    d <= 2 ? 'yellow' : // if (d >= 1960) return 'black' else etc…
+  return d <= 1 ? 'green' : // Means: if (d <= 1) return 'green' else…
+    d <= 2 ? 'yellow' : // if (d <-2) return 'yellow' else etc…
     d <= 3 ? 'gold' :
     d <= 4 ? 'orange' : // Note that numbers must be in descending order
-    'red';
+    'red'; //return red as final choice
 };
     function createMap(earthquakedata) {
 
@@ -16,12 +18,12 @@ function getColor(d) {
           accessToken: API_KEY
         });
       
-        // Create a baseMaps object to hold the lightmap layer
+        // Create a baseMaps object to hold the streetmap layer
         var baseMaps = {
           "street Map": streetmap
         };
       
-        // Create an overlayMaps object to hold the bikeStations layer
+        // Create an overlayMaps object to hold the earthquakedata layer
         var overlayMaps = {
           "earthquakes": earthquakedata
         };
@@ -37,7 +39,7 @@ function getColor(d) {
         L.control.layers(baseMaps, overlayMaps, {
           collapsed: false
         }).addTo(map);
-
+//set variable to create legend with the data
     var legend = L.control({position: 'bottomright'});
     legend.onAdd = function (map) {
 
@@ -45,6 +47,7 @@ function getColor(d) {
       labels = ['<strong>Categories</strong>'],
       categories = ['0-1','1-2','2-3','3-4','5+'];
   
+    //cycle through the full length of the data, push for each one to show the color
       for (var i = 0; i < categories.length; i++) {
   
               div.innerHTML += 
@@ -58,20 +61,21 @@ function getColor(d) {
       };
       legend.addTo(map);
     };
+    //set function to create markers for teh data
       function createMarkers(data) {
       
       
-        // Initialize an array to hold bike markers
-        var earthquakeArray = [];
+        // Initialize an array to hold earthquake markers
         var quakeMarkers = [];
       
-        // Loop through the stations array
+        // Loop through the earthquake array
         for (var index = 0; index < data.features.length; index++) {
             var location = data.features[index];
             var utcSeconds = location.properties.time
+            //convert date information
             var d = new Date(0)
             d.setUTCSeconds(utcSeconds);
-          // For each station, create a marker and bind a popup with the station's name
+          // For each incident, create a marker and bind a popup with the earthquake location
           var quakeMarker = L.circleMarker([location.geometry.coordinates[1], location.geometry.coordinates[0]],
           {
             color: getColor(location.properties.mag),
@@ -79,16 +83,17 @@ function getColor(d) {
             fillOpacity: 0.5,
             radius: location.properties.mag*4
           })
+          //set values to be displayed on popup
           .bindPopup("<h3>" + location.properties.place + "</h3><h3>Magnitude: " + location.properties.mag + "</h3><h3>date: "+d);
     
-        // Add the marker to the bikeMarkers array
+        // Add the marker to the quakemarkers array
         quakeMarkers.push(quakeMarker);
         }
       
-        // Create a layer group made from the bike markers array, pass it into the createMap function
+        // Create a layer group made from the quakemarkers array, pass it into the createMap function
         createMap(L.layerGroup(quakeMarkers));
       }
 
-      // Perform an API call to the Citi Bike API to get station information. Call createMarkers when complete
+      // Perform an API call to the earthquake API to get earthquake information. Call createMarkers when complete
 d3.json(jsonUrl, createMarkers);
 
